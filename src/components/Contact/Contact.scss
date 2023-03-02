@@ -1,0 +1,39 @@
+.contact {
+    background-color: #2879fe;
+    color: white;
+    display: flex;
+    justify-content: center;
+
+    .wrapper {
+        border: 1px solid red;
+        
+        width: 50%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        
+        input {
+            border: 1px solid green($color: #000000);
+            padding: 10px;
+            border-radius: 5px 0 0 5px;
+
+        }
+
+        button {
+            padding:  10px;
+            border-radius: 0 5px 5px 0;
+            background: #000000;
+            color: aliceblue;
+ 
+        }
+
+        .icons {
+            display: flex;
+            align-items: center;
+            border: 1px solid red;
+            gap: 10px;
+
+        }
+
+    }
+}
