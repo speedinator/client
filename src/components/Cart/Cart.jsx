@@ -1,54 +1,74 @@
-import React from 'react'
-import "./Cart.scss"
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
-
+import React from "react";
+import "./Cart.scss";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import { useSelector } from "react-redux";
+import { removeItem, resetCart } from "../../redux/cartReducer";
+import { useDispatch } from "react-redux";
+import { makeRequest } from "../../makeRequest";
+// import { makeRequest } from "../../makeRequest";
+import { loadStripe } from "@stripe/stripe-js";
 
 const Cart = () => {
 
-    const data = [
-        {
-            id: 1,
-            image: "../img/Slider/front totale.png",
-            image2: "../img/Slider/Vesa Halterung 400 variabel (ohne Gelenk) front 1.jpg",
-            price: "149",
-            title: "Vesa 400 Mount",
-            desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum soluta, est quis necessitatibus voluptas minus deleniti aspernatur unde sint beatae quidem, vel nisi a voluptates inventore impedit odio aliquam aut?"
-        },
-        {
-            id: 2,
-            image: "../img/Slider/Vesa Halterung 400 variabel (ohne Gelenk) front 1.jpg",
-            image2: "../img/Slider/front totale.png",
-            price: "149",
-            title: "Vesa 400 Mount",
-            desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum soluta, est quis necessitatibus voluptas minus deleniti aspernatur unde sint beatae quidem, vel nisi a voluptates inventore impedit odio aliquam aut?"
-        },
-    ]
-    return (
-        <div className='cart'>
-            <h1> Products in your cart</h1>
-            {data?.map(item => (
-                <div className='item' key={item.id}>
-                    <img src={item.image} alt="" />
-                    <div className="details">
-                        <h1>{item.title}</h1>
+    const products = useSelector((state) => state.cart.products);
+    const dispatch = useDispatch();
 
-                        <p>{item.desc.substring(0, 100)} </p>
-                        <div className="price">1x €{item.price}</div>
-                    </div>
+    const totalPrice = () => {
+        let total = 0;
+        products.forEach((item) => {
+            total += item.quantity * item.price;
+        });
 
-                    <DeleteOutlinedIcon className='delete' />
+        return total.toFixed(2);
+    }
+
+    const stripePromise = loadStripe(
+        "pk_test_51MiJQJHFtWOHFDzdqXEaHXQrR5YN6ziv5v1peGsmO4rgDygbQm4Eb4p7SjWOh1c364wqol6suT3AJc9tK7mJCxu600CW7J1HDh"
+      );
+
+      const handlePayment = async () => {
+        try {
+          const stripe = await stripePromise;
+          const res = await makeRequest.post("/orders", {
+            products,
+          });
+          await stripe.redirectToCheckout({
+            sessionId: res.data.stripeSession.id,
+          });
+    
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      return (
+        <div className="cart">
+          <h1>Products in your cart</h1>
+          {products?.map((item) => (
+            <div className="item" key={item.id}>
+              <img src={process.env.REACT_APP_UPLOAD_URL + item.img} alt="" />
+              <div className="details">
+                <h1>{item.title}</h1>
+                <p>{item.desc?.substring(0, 100)}</p>
+                <div className="price">
+                  {item.quantity} x ${item.price}
                 </div>
-            ))
-            }
-            <div className="total">
-                <span>Gesamt</span>
-                <span>€ Summer</span>
+              </div>
+              <DeleteOutlinedIcon
+                className="delete"
+                onClick={() => dispatch(removeItem(item.id))}
+              />
             </div>
-            <button>Zur Kasse</button>
-            <span className='reset'>Kasse zurücksetzen</span>
-
+          ))}
+          <div className="total">
+            <span>SUBTOTAL</span>
+            <span>${totalPrice()}</span>
+          </div>
+          <button onClick={handlePayment}>PROCEED TO CHECKOUT</button>
+          <span className="reset" onClick={() => dispatch(resetCart())}>
+            Reset Cart
+          </span>
         </div>
-    )
-}
-
-export default Cart
+      );
+    };
+    
+    export default Cart;

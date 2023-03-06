@@ -1,41 +1,22 @@
-import React from 'react'
-import "./List.scss"
-import Card from '../Card/Card'
+import React from "react";
+import "./List.scss";
+import Card from "../Card/Card";
+import useFetch from "../../hooks/useFetch";
 
-const List = () => {
-
-
-    const data = [
-        {
-            id: 1,
-            image: "../img/Slider/front totale.png",
-            image2: "../img/Slider/Vesa Halterung 400 variabel (ohne Gelenk) front 1.jpg",
-            price: "149",
-            title: "Vesa 400 Mount",
-        },
-
-        {
-            id: 2,
-            image: "../img/Slider/front totale.png",
-            title: "Bike",
-        },
-
-        {
-            id: 3,
-            image: "../img/Slider/front totale.png",
-            title: "Bike",
-        }
-
-    ]
+const List = ({ subCats, maxPrice, sort, catId }) => {
+  const { data, loading, error } = useFetch(
+    `/products?populate=*&[filters][categories][id]=${catId}${subCats.map(
+      (item) => `&[filters][sub_categories][id][$eq]=${item}`
+    )}&[filters][price][$lte]=${maxPrice}&sort=price:${sort}`
+  );
 
   return (
-    <div className='list'>{data?.map(item => (
-        <Card item={item} key={item.id} image={item.image}/>
+    <div className="list">
+      {loading
+        ? "loading"
+        : data?.map((item) => <Card item={item} key={item.id} />)}
+    </div>
+  );
+};
 
-    ))}</div>
-
-
-  )
-}
-
-export default List
+export default List;
