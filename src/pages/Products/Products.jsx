@@ -8,7 +8,7 @@ import "./Products.scss";
 const Products = () => {
   const catId = parseInt(useParams().id);
   const [maxPrice, setMaxPrice] = useState(1000);
-  const [sort, setSort] = useState(null);
+  const [sort, setSort] = useState("asc");
   const [selectedSubCats, setSelectedSubCats] = useState([]);
 
   const { data, loading, error } = useFetch(
@@ -27,7 +27,7 @@ const Products = () => {
   };
 
   console.log(selectedSubCats); 
-
+  
   
   return (
     <div className="products">
@@ -54,7 +54,10 @@ const Products = () => {
               type="range"
               min={0}
               max={1000}
-              onChange={(e) => setMaxPrice(e.target.value)}
+              onRangeDragEnd={(e) => {
+                setMaxPrice(e.target.value)
+                console.log(e.target.value)
+              }}
             />
             <span>{maxPrice}</span>
           </div>
